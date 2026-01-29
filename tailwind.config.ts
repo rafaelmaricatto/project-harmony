@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +59,14 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        status: {
+          draft: "hsl(var(--status-draft))",
+          pending: "hsl(var(--status-pending))",
+          active: "hsl(var(--status-active))",
+          expiring: "hsl(var(--status-expiring))",
+          closed: "hsl(var(--status-closed))",
+          renewed: "hsl(var(--status-renewed))",
         },
       },
       borderRadius: {
