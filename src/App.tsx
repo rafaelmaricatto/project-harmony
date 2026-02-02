@@ -11,9 +11,12 @@ import ContractDetails from "./pages/contracts/ContractDetails";
 import ContractForm from "./pages/contracts/ContractForm";
 import ProjectsList from "./pages/projects/ProjectsList";
 import ProjectDetails from "./pages/projects/ProjectDetails";
+import ProjectForm from "./pages/projects/ProjectForm";
 import ClientsList from "./pages/clients/ClientsList";
 import EconomicGroupsList from "./pages/economicGroups/EconomicGroupsList";
 import Settings from "./pages/settings/Settings";
+import MonthlyReport from "./pages/reports/MonthlyReport";
+import MonthlyClosing from "./pages/closing/MonthlyClosing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,7 +39,15 @@ const App = () => (
           
           {/* Projects */}
           <Route path="/projetos" element={<ProjectsList />} />
+          <Route path="/projetos/novo" element={<ProjectForm />} />
+          <Route path="/projetos/novo/:contractId" element={<ProjectForm />} />
           <Route path="/projetos/:id" element={<ProjectDetails />} />
+          
+          {/* Reports */}
+          <Route path="/relatorio-mensal" element={<MonthlyReport />} />
+          
+          {/* Monthly Closing */}
+          <Route path="/fechamento-mensal" element={<MonthlyClosing />} />
           
           {/* Clients */}
           <Route path="/clientes" element={<ClientsList />} />

@@ -1,115 +1,79 @@
+# Sistema de Gestão de Contratos e Projetos
 
+## Fase 1 - Implementação Base ✅
 
-## Sistema de Gestão de Contratos e Projetos — Fase 1
+### Módulo de Contratos
+- [x] Dashboard com cards de estatísticas
+- [x] Lista de contratos com filtros e busca
+- [x] Formulário de criação/edição de contratos
+- [x] Detalhes do contrato com projetos vinculados
+- [x] Badges de status visuais
 
-### Visão Geral
-Aplicação web para gestão de contratos e projetos de consultoria, com visual corporativo clássico (tons de azul e cinza), estrutura modular e navegação em camadas (Contrato → Projetos → Parcelas).
+### Módulo de Projetos
+- [x] Lista de projetos com filtros
+- [x] Detalhes do projeto com parcelas e comissões
+- [x] Histórico de líderes (versionamento)
+- [x] Modal de alteração de líder com registro histórico
 
----
-
-### Módulo 1: Contratos (Entrega Completa)
-
-**1.1 Dashboard de Contratos**
-- Visão geral com cards resumindo: contratos ativos, próximos do vencimento, aguardando aprovação
-- Tabela listando todos os contratos com filtros por status, cliente, área e período
-- Busca rápida por nome do cliente ou código do contrato
-- Indicadores visuais de status (badges coloridos)
-
-**1.2 Cadastro/Edição de Contrato**
-Formulário completo em etapas com todos os campos especificados:
-- **Identificação do Cliente**: cliente, grupo econômico, representação de marca, cliente novo, tipo de cliente
-- **Identificação do Contrato**: ID automático, código gerado, número CRM, tipo (pontual/recorrente), recorrência, moeda
-- **Vigência**: datas de início/término, renovação automática
-- **Renovação e Governança**: aprovação do gerente, tipo de renovação, status do contrato
-- **Anexos**: upload de PDF do contrato
-
-**1.3 Fluxo de Status**
-- Contratos iniciam como "Em elaboração"
-- Transições visuais entre status (Em elaboração → Aguardando aprovação → Ativo → etc.)
-- Indicação clara do status atual com histórico de mudanças
+### Dados Mock
+- [x] Contratos de exemplo
+- [x] Projetos vinculados
+- [x] Parcelas e comissões
+- [x] Histórico de líderes simulado
 
 ---
 
-### Módulo 2: Projetos (Vinculados ao Contrato)
+## Fase 2 - Funcionalidades Gerenciais ✅
 
-**2.1 Lista de Projetos por Contrato**
-- Visualização hierárquica: ao abrir um contrato, ver todos os seus projetos
-- Cards ou tabela com nome do projeto, área, líder atual, status
+### 1. Dashboard Gerencial
+- [x] Receita projetada total (consolidada em BRL)
+- [x] Receita por área/departamento (com gráfico de barras)
+- [x] Receita por tipo de contrato (pontual vs recorrente - gráfico de pizza)
+- [x] Cards com quantidade E valor financeiro
+- [x] Projeção de receitas futuras com gráfico
+- [x] Filtros por mês, área, cliente e projeto
+- [x] Exibição de taxas de câmbio utilizadas
 
-**2.2 Cadastro/Edição de Projeto**
-- Nome do projeto, contrato vinculado (seleção ou automático)
-- Área/Departamento (dropdown com opções da consultoria)
-- Campos preparados para integração futura: Líder/Sênior, Coordenador, Gerente (texto ou seleção simples por enquanto)
+### 2. Relatório Mensal de Projetos
+- [x] Seletor de mês de competência
+- [x] Projetos novos no mês
+- [x] Projetos encerrados no mês
+- [x] Projetos renovados no mês
+- [x] Tabelas com projeto, cliente, área, valores e período
 
-**2.3 Histórico de Líderes**
-- Ao alterar líder: modal perguntando "A partir de qual período o novo líder assume?"
-- Registro automático com líder anterior, novo líder, período de responsabilidade
-- Timeline visual do histórico de líderes
-- **Nunca sobrescrever** — sempre versionar
+### 3. Automação de Parcelas
+- [x] Formulário de novo projeto com geração automática
+- [x] Informar valor total, quantidade de parcelas e data inicial
+- [x] Cálculo automático de valor por parcela
+- [x] Geração sequencial mês a mês
+- [x] Cálculo de impostos estimados
+- [x] Validação de meses fechados
 
----
-
-### Módulo 3: Parcelas/Fases do Projeto
-
-**3.1 Lista de Parcelas**
-- Tabela mostrando todas as parcelas de um projeto
-- Período de competência, tipo, valor, impostos estimados
-
-**3.2 Cadastro de Parcelas**
-- Vinculação automática ao projeto
-- Tipo: Mensal ou Pontual
-- Período de competência (mês/ano ou datas)
-- Valor, moeda (herdada do contrato)
-- Impostos: percentual e valor estimado
-- Observações livres
-
-**3.3 Resumo Financeiro**
-- Total do projeto (soma das parcelas)
-- Total de impostos estimados
-- Visão por período
+### 4. Fechamento Mensal (Governança)
+- [x] Lista de períodos com status (Aberto/Fechado)
+- [x] Ação de fechar mês (com justificativa opcional)
+- [x] Ação de reabrir mês (com justificativa obrigatória)
+- [x] Histórico de ações por período
+- [x] Validação em formulários (bloqueio de meses fechados)
+- [x] Logs de quem fechou/reabriu, quando e por quê
 
 ---
 
-### Módulo 4: Comissões e Bonificações
+## Próximas Fases (Planejadas)
 
-**4.1 Cadastro por Projeto**
-- Múltiplas comissões por projeto
-- Tipos: Comissão de vendedor, Comissão de gerente/coordenador, Bonificação de parceiro
-- Campos: Pessoa/parceiro, tipo, percentual ou valor fixo, base de cálculo, observações
+### Fase 3 - Autenticação e Permissões
+- [ ] Login/logout com email e senha
+- [ ] Perfis: Administrador, Controladoria, Diretoria, Gerentes
+- [ ] Controle de acesso por área
+- [ ] Fluxo de aprovação de contratos
 
----
+### Fase 4 - Notificações e Alertas
+- [ ] Alertas de contratos a vencer (30/60/90 dias)
+- [ ] Solicitação de aprovação de renovação
+- [ ] Dashboard de pendências
 
-### Estrutura Técnica e Navegação
-
-**Navegação em Camadas**
-- Menu lateral com: Dashboard, Contratos, Clientes, Grupos Econômicos, Configurações
-- Drill-down: Contrato → Projetos → Parcelas
-- Breadcrumbs para orientação
-
-**Logs e Histórico**
-- Registro de todas as alterações críticas (mudança de status, alteração de líder, edições de valores)
-- Visualização de quem alterou, quando e o que mudou
-
-**Visual Corporativo**
-- Paleta: azul escuro, cinza, branco
-- Tipografia profissional
-- Formulários claros e organizados em seções
-- Tabelas responsivas com ações contextuais
-
----
-
-### Dados de Demonstração
-- 3-4 contratos de exemplo com diferentes status
-- Projetos vinculados com parcelas
-- Histórico de líderes simulado
-
----
-
-### Preparação para Fases Futuras
-A estrutura será projetada para fácil adição de:
-- ✅ Autenticação e permissões (próxima fase)
-- ✅ Notificações e alertas de vencimento
-- ✅ Módulo de faturamento
-- ✅ Integração com cadastro de pessoas/equipe
-- ✅ Relatórios gerenciais e PPR
-
+### Fase 5 - Integrações
+- [ ] Upload real de anexos PDF
+- [ ] Integração com cadastro de pessoas
+- [ ] Módulo de faturamento
+- [ ] Relatórios gerenciais e PPR
