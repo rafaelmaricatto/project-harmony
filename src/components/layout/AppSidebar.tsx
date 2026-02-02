@@ -5,7 +5,9 @@ import {
   Users, 
   Settings,
   FolderKanban,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  Lock
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -38,6 +40,19 @@ const mainNavItems = [
     title: "Projetos",
     url: "/projetos",
     icon: FolderKanban,
+  },
+];
+
+const reportsItems = [
+  {
+    title: "Relatório Mensal",
+    url: "/relatorio-mensal",
+    icon: BarChart3,
+  },
+  {
+    title: "Fechamento Mensal",
+    url: "/fechamento-mensal",
+    icon: Lock,
   },
 ];
 
@@ -120,6 +135,36 @@ export function AppSidebar() {
                       {isActive(item.url) && !isCollapsed && (
                         <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
                       )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">
+            Relatórios
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {reportsItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <NavLink 
+                      to={item.url} 
+                      className={cn(
+                        "flex items-center gap-3",
+                        isActive(item.url) && "font-medium"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
