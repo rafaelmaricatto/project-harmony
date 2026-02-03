@@ -17,6 +17,7 @@ import EconomicGroupsList from "./pages/economicGroups/EconomicGroupsList";
 import Settings from "./pages/settings/Settings";
 import MonthlyReport from "./pages/reports/MonthlyReport";
 import MonthlyClosing from "./pages/closing/MonthlyClosing";
+import AuditLogList from "./pages/logs/AuditLogList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,9 @@ const App = () => (
           
           {/* Monthly Closing */}
           <Route path="/fechamento-mensal" element={<MonthlyClosing />} />
+          
+          {/* Logs */}
+          <Route path="/logs" element={<AuditLogList />} />
           
           {/* Clients */}
           <Route path="/clientes" element={<ClientsList />} />
