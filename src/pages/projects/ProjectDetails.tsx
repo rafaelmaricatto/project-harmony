@@ -12,23 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { 
   getProjectWithRelations, 
   getContractById,
@@ -50,22 +33,24 @@ import {
   Pencil,
   Users,
   DollarSign,
-  Calendar as CalendarIcon,
   Plus,
   History,
   UserCog,
   Receipt,
   Percent
 } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { useState, useCallback } from "react";
+import { LeaderChangeModal } from "@/components/projects/LeaderChangeModal";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
   const [isLeaderDialogOpen, setIsLeaderDialogOpen] = useState(false);
-  const [newLeaderName, setNewLeaderName] = useState("");
-  const [newLeaderStartDate, setNewLeaderStartDate] = useState<Date | undefined>(undefined);
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Force refresh when leader changes
+  const handleLeaderChangeSuccess = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
   
   if (!id) {
     return (
@@ -102,24 +87,9 @@ export default function ProjectDetails() {
   const totalValue = installments.reduce((sum, inst) => sum + inst.value, 0);
   const totalTax = installments.reduce((sum, inst) => sum + (inst.taxEstimatedValue || 0), 0);
 
-  const handleLeaderChange = () => {
-    if (!newLeaderName || !newLeaderStartDate) {
-      toast.error("Preencha todos os campos");
-      return;
-    }
-
-    toast.success("Líder alterado com sucesso!", {
-      description: `${newLeaderName} assume a partir de ${format(newLeaderStartDate, "dd/MM/yyyy", { locale: ptBR })}`
-    });
-    
-    setIsLeaderDialogOpen(false);
-    setNewLeaderName("");
-    setNewLeaderStartDate(undefined);
-  };
-
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6" key={refreshKey}>
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="space-y-1">
@@ -160,77 +130,14 @@ export default function ProjectDetails() {
                   <Users className="h-5 w-5" />
                   Equipe do Projeto
                 </CardTitle>
-                <Dialog open={isLeaderDialogOpen} onOpenChange={setIsLeaderDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      <UserCog className="mr-2 h-4 w-4" />
-                      Alterar Líder
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Alterar Líder do Projeto</DialogTitle>
-                      <DialogDescription>
-                        Informe o novo líder e a partir de qual período ele assume.
-                        O histórico será mantido automaticamente.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>Líder Atual</Label>
-                        <p className="text-sm font-medium">{project.leaderName || "Não definido"}</p>
-                      </div>
-                      <Separator />
-                      <div className="space-y-2">
-                        <Label htmlFor="newLeader">Novo Líder *</Label>
-                        <Input
-                          id="newLeader"
-                          value={newLeaderName}
-                          onChange={(e) => setNewLeaderName(e.target.value)}
-                          placeholder="Nome do novo líder"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>A partir de qual período? *</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !newLeaderStartDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newLeaderStartDate ? (
-                                format(newLeaderStartDate, "dd/MM/yyyy", { locale: ptBR })
-                              ) : (
-                                "Selecione a data"
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={newLeaderStartDate}
-                              onSelect={setNewLeaderStartDate}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsLeaderDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleLeaderChange}>
-                        Confirmar Alteração
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setIsLeaderDialogOpen(true)}
+                >
+                  <UserCog className="mr-2 h-4 w-4" />
+                  Alterar Líder
+                </Button>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-3 gap-4">
@@ -256,7 +163,7 @@ export default function ProjectDetails() {
                       Histórico de Líderes
                     </div>
                     <div className="space-y-2">
-                      {leaderHistory.map((entry, index) => (
+                      {leaderHistory.map((entry) => (
                         <div 
                           key={entry.id}
                           className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg text-sm"
@@ -513,6 +420,17 @@ export default function ProjectDetails() {
           </div>
         </div>
       </div>
+
+      {/* Leader Change Modal */}
+      <LeaderChangeModal
+        isOpen={isLeaderDialogOpen}
+        onClose={() => setIsLeaderDialogOpen(false)}
+        projectId={id}
+        projectName={project.name}
+        currentLeaderId={project.leaderId}
+        currentLeaderName={project.leaderName}
+        onSuccess={handleLeaderChangeSuccess}
+      />
     </AppLayout>
   );
 }

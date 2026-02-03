@@ -7,7 +7,8 @@ import {
   FolderKanban,
   ChevronRight,
   BarChart3,
-  Lock
+  Lock,
+  History
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -53,6 +54,11 @@ const reportsItems = [
     title: "Fechamento Mensal",
     url: "/fechamento-mensal",
     icon: Lock,
+  },
+  {
+    title: "Histórico e Logs",
+    url: "/logs",
+    icon: History,
   },
 ];
 
