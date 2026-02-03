@@ -8,7 +8,9 @@ import {
   ChevronRight,
   BarChart3,
   Lock,
-  History
+  History,
+  Calculator,
+  Briefcase
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -51,6 +53,11 @@ const reportsItems = [
     icon: BarChart3,
   },
   {
+    title: "Relatório Gerencial",
+    url: "/relatorio-gerencial",
+    icon: Calculator,
+  },
+  {
     title: "Fechamento Mensal",
     url: "/fechamento-mensal",
     icon: Lock,
@@ -63,6 +70,11 @@ const reportsItems = [
 ];
 
 const managementItems = [
+  {
+    title: "Empresas",
+    url: "/empresas",
+    icon: Briefcase,
+  },
   {
     title: "Clientes",
     url: "/clientes",

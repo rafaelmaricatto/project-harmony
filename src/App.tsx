@@ -14,10 +14,11 @@ import ProjectDetails from "./pages/projects/ProjectDetails";
 import ProjectForm from "./pages/projects/ProjectForm";
 import ClientsList from "./pages/clients/ClientsList";
 import EconomicGroupsList from "./pages/economicGroups/EconomicGroupsList";
+import CompaniesList from "./pages/companies/CompaniesList";
 import Settings from "./pages/settings/Settings";
 import MonthlyReport from "./pages/reports/MonthlyReport";
+import ManagerialReport from "./pages/reports/ManagerialReport";
 import MonthlyClosing from "./pages/closing/MonthlyClosing";
-// AuditLogList import temporarily removed for build fix
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,12 +47,13 @@ const App = () => (
           
           {/* Reports */}
           <Route path="/relatorio-mensal" element={<MonthlyReport />} />
+          <Route path="/relatorio-gerencial" element={<ManagerialReport />} />
           
           {/* Monthly Closing */}
           <Route path="/fechamento-mensal" element={<MonthlyClosing />} />
           
-          {/* Logs - temporarily disabled */}
-          {/* <Route path="/logs" element={<AuditLogList />} /> */}
+          {/* Companies */}
+          <Route path="/empresas" element={<CompaniesList />} />
           
           {/* Clients */}
           <Route path="/clientes" element={<ClientsList />} />

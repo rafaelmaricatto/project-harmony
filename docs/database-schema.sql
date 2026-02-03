@@ -40,13 +40,23 @@ CREATE TYPE public.department AS ENUM (
 
 CREATE TYPE public.monthly_closing_status AS ENUM ('open', 'closed');
 
+CREATE TYPE public.tax_index_status AS ENUM ('forecast', 'consolidated');
+
+CREATE TYPE public.company_type AS ENUM ('brazil', 'argentina_subsidiary');
+
+CREATE TYPE public.company_status AS ENUM ('active', 'inactive');
+
+CREATE TYPE public.country AS ENUM ('BR', 'AR');
+
 CREATE TYPE public.audit_entity_type AS ENUM (
   'contract',
   'project',
   'installment',
   'commission',
   'monthly_closing',
-  'leader_change'
+  'leader_change',
+  'company',
+  'tax_index'
 );
 
 CREATE TYPE public.audit_action AS ENUM (
@@ -58,7 +68,9 @@ CREATE TYPE public.audit_action AS ENUM (
   'value_change',
   'close_month',
   'reopen_month',
-  'renewal'
+  'renewal',
+  'consolidate',
+  'tax_index_update'
 );
 
 -- 2. TABELAS PRINCIPAIS
@@ -85,12 +97,26 @@ CREATE TABLE public.clients (
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
 
+-- Empresas (Pessoas Jurídicas)
+CREATE TABLE public.companies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  cnpj TEXT, -- CNPJ para Brasil, CUIT para Argentina
+  country public.country NOT NULL DEFAULT 'BR',
+  type public.company_type NOT NULL DEFAULT 'brazil',
+  status public.company_status NOT NULL DEFAULT 'active',
+  fixed_tax_rate DECIMAL(5, 4), -- Taxa fixa de imposto (usado para Argentina)
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
 -- Contratos
 CREATE TABLE public.contracts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT NOT NULL UNIQUE,
   crm_sale_number TEXT,
   client_id UUID NOT NULL REFERENCES public.clients(id) ON DELETE RESTRICT,
+  company_id UUID REFERENCES public.companies(id) ON DELETE SET NULL, -- Empresa faturadora
   client_type public.client_type NOT NULL,
   contract_type public.contract_type NOT NULL,
   recurrence_type public.recurrence_type,
@@ -223,6 +249,55 @@ CREATE TABLE public.exchange_rates (
   UNIQUE (from_currency, to_currency, effective_date)
 );
 
+-- Índice Médio de Impostos
+CREATE TABLE public.monthly_tax_indices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  year_month TEXT NOT NULL UNIQUE, -- formato: "2024-01"
+  
+  -- Valores realizados (informados manualmente no fechamento)
+  actual_revenue DECIMAL(15, 2), -- Receita contábil realizada (BRL)
+  actual_taxes DECIMAL(15, 2), -- Impostos realizados (BRL)
+  
+  -- Índice calculado
+  tax_index_rate DECIMAL(8, 6) NOT NULL, -- Percentual do índice médio (ex: 0.1133 = 11.33%)
+  
+  -- Status
+  status public.tax_index_status NOT NULL DEFAULT 'forecast',
+  
+  -- Metadados
+  calculated_at TIMESTAMPTZ,
+  consolidated_at TIMESTAMPTZ,
+  consolidated_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  consolidated_by_name TEXT,
+  
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- Log de Índices de Impostos
+CREATE TABLE public.tax_index_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  monthly_tax_index_id UUID REFERENCES public.monthly_tax_indices(id) ON DELETE CASCADE,
+  action TEXT NOT NULL CHECK (action IN ('calculate', 'consolidate', 'update', 'config_change')),
+  field TEXT,
+  old_value TEXT,
+  new_value TEXT,
+  performed_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  performed_by_name TEXT NOT NULL,
+  justification TEXT,
+  performed_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- Configuração de Taxa Fixa Argentina
+CREATE TABLE public.argentina_tax_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  fixed_tax_rate DECIMAL(5, 4) NOT NULL, -- Percentual fixo (ex: 0.21 = 21%)
+  effective_from DATE NOT NULL,
+  effective_to DATE,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
 -- 4. TABELA DE AUDIT LOG
 -- ========================================
 
@@ -246,7 +321,10 @@ CREATE TABLE public.audit_logs (
 
 CREATE INDEX idx_clients_economic_group ON public.clients(economic_group_id);
 CREATE INDEX idx_contracts_client ON public.contracts(client_id);
+CREATE INDEX idx_contracts_company ON public.contracts(company_id);
 CREATE INDEX idx_contracts_status ON public.contracts(status);
+CREATE INDEX idx_companies_type ON public.companies(type);
+CREATE INDEX idx_companies_status ON public.companies(status);
 CREATE INDEX idx_projects_contract ON public.projects(contract_id);
 CREATE INDEX idx_projects_department ON public.projects(department);
 CREATE INDEX idx_installments_project ON public.installments(project_id);
@@ -254,6 +332,8 @@ CREATE INDEX idx_installments_competence ON public.installments(competence_month
 CREATE INDEX idx_commissions_project ON public.commissions(project_id);
 CREATE INDEX idx_leader_history_project ON public.leader_history(project_id);
 CREATE INDEX idx_monthly_closings_year_month ON public.monthly_closings(year_month);
+CREATE INDEX idx_monthly_tax_indices_year_month ON public.monthly_tax_indices(year_month);
+CREATE INDEX idx_monthly_tax_indices_status ON public.monthly_tax_indices(status);
 CREATE INDEX idx_audit_logs_entity ON public.audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_logs_timestamp ON public.audit_logs(timestamp DESC);
 
@@ -300,6 +380,18 @@ CREATE TRIGGER update_exchange_rates_updated_at
   BEFORE UPDATE ON public.exchange_rates
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
+CREATE TRIGGER update_companies_updated_at
+  BEFORE UPDATE ON public.companies
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+CREATE TRIGGER update_monthly_tax_indices_updated_at
+  BEFORE UPDATE ON public.monthly_tax_indices
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+CREATE TRIGGER update_argentina_tax_config_updated_at
+  BEFORE UPDATE ON public.argentina_tax_config
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
 -- 7. RLS (Row Level Security) - BÁSICO
 -- ========================================
 
@@ -315,6 +407,10 @@ ALTER TABLE public.monthly_closings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.monthly_closing_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.exchange_rates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.monthly_tax_indices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tax_index_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.argentina_tax_config ENABLE ROW LEVEL SECURITY;
 
 -- Políticas básicas (permitir tudo para usuários autenticados)
 -- Ajuste conforme necessidades de segurança
@@ -397,6 +493,32 @@ CREATE POLICY "Authenticated users can read audit_logs"
 CREATE POLICY "Authenticated users can insert audit_logs"
   ON public.audit_logs FOR INSERT TO authenticated WITH CHECK (true);
 
+CREATE POLICY "Authenticated users can read companies"
+  ON public.companies FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can insert companies"
+  ON public.companies FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Authenticated users can update companies"
+  ON public.companies FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can read monthly_tax_indices"
+  ON public.monthly_tax_indices FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can insert monthly_tax_indices"
+  ON public.monthly_tax_indices FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Authenticated users can update monthly_tax_indices"
+  ON public.monthly_tax_indices FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can read tax_index_logs"
+  ON public.tax_index_logs FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can insert tax_index_logs"
+  ON public.tax_index_logs FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can read argentina_tax_config"
+  ON public.argentina_tax_config FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can insert argentina_tax_config"
+  ON public.argentina_tax_config FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Authenticated users can update argentina_tax_config"
+  ON public.argentina_tax_config FOR UPDATE TO authenticated USING (true);
+
 -- 8. FUNÇÃO PARA GERAR CÓDIGO DE CONTRATO
 -- ========================================
 
@@ -428,6 +550,28 @@ CREATE TRIGGER generate_contract_code_trigger
   FOR EACH ROW
   WHEN (NEW.code IS NULL OR NEW.code = '')
   EXECUTE FUNCTION public.generate_contract_code();
+
+-- 9. FUNÇÃO PARA CALCULAR ÍNDICE MÉDIO
+-- ========================================
+
+CREATE OR REPLACE FUNCTION public.calculate_tax_index(
+  p_actual_revenue DECIMAL,
+  p_actual_taxes DECIMAL
+)
+RETURNS DECIMAL AS $$
+BEGIN
+  IF p_actual_revenue <= 0 THEN
+    RETURN 0;
+  END IF;
+  RETURN p_actual_taxes / p_actual_revenue;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 10. INSERIR CONFIGURAÇÃO INICIAL DA ARGENTINA
+-- ========================================
+
+INSERT INTO public.argentina_tax_config (fixed_tax_rate, effective_from)
+VALUES (0.21, '2022-01-01');
 
 -- ========================================
 -- FIM DO SCHEMA
