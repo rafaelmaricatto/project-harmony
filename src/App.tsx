@@ -19,6 +19,11 @@ import Settings from "./pages/settings/Settings";
 import MonthlyReport from "./pages/reports/MonthlyReport";
 import ManagerialReport from "./pages/reports/ManagerialReport";
 import MonthlyClosing from "./pages/closing/MonthlyClosing";
+import PersonsList from "./pages/team/PersonsList";
+import PositionsLevelsList from "./pages/team/PositionsLevelsList";
+import DepartmentsList from "./pages/team/DepartmentsList";
+import MonthlyCosts from "./pages/team/MonthlyCosts";
+import TerminationsList from "./pages/team/TerminationsList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +65,13 @@ const App = () => (
           
           {/* Economic Groups */}
           <Route path="/grupos-economicos" element={<EconomicGroupsList />} />
+          
+          {/* Team / People Module */}
+          <Route path="/equipe" element={<PersonsList />} />
+          <Route path="/equipe/cargos-niveis" element={<PositionsLevelsList />} />
+          <Route path="/equipe/departamentos" element={<DepartmentsList />} />
+          <Route path="/equipe/custos-mensais" element={<MonthlyCosts />} />
+          <Route path="/equipe/rescisoes" element={<TerminationsList />} />
           
           {/* Settings */}
           <Route path="/configuracoes" element={<Settings />} />
