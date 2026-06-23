@@ -96,6 +96,11 @@
     --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Accent Orange - Dark */
+    --accent-orange: 24 90% 58%;
+    --accent-orange-foreground: 0 0% 100%;
+    --accent-orange-subtle: 24 60% 20%;
+
     --border: 215 25% 22%;
     --input: 215 25% 22%;
     --ring: 215 60% 55%;
