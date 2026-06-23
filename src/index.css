@@ -41,6 +41,11 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Accent: Vibrant Orange */
+    --accent-orange: 24 95% 53%;
+    --accent-orange-foreground: 0 0% 100%;
+    --accent-orange-subtle: 24 95% 95%;
+
     --border: 215 20% 88%;
     --input: 215 20% 88%;
     --ring: 215 70% 35%;

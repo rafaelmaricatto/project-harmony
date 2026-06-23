@@ -41,6 +41,9 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          orange: "hsl(var(--accent-orange))",
+          "orange-foreground": "hsl(var(--accent-orange-foreground))",
+          "orange-subtle": "hsl(var(--accent-orange-subtle))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
