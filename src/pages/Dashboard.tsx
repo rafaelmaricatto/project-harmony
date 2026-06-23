@@ -49,8 +49,8 @@ import {
 } from "recharts";
 
 const CHART_COLORS = [
+  'hsl(var(--accent-orange))',
   'hsl(var(--primary))',
-  'hsl(var(--chart-2))',
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
   'hsl(var(--chart-5))',
@@ -159,12 +159,12 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Receita Projetada Total
               </CardTitle>
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-primary" />
+              <div className="h-8 w-8 rounded-lg bg-accent-orange-subtle flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-accent-orange" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
+              <div className="text-2xl font-bold text-accent-orange">{formatCurrency(totalRevenue)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 Consolidado em BRL
               </p>
@@ -210,8 +210,8 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Em Renovação
               </CardTitle>
-              <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                <RefreshCcw className="h-4 w-4 text-blue-600" />
+              <div className="h-8 w-8 rounded-lg bg-accent-orange-subtle flex items-center justify-center">
+                <RefreshCcw className="h-4 w-4 text-accent-orange" />
               </div>
             </CardHeader>
             <CardContent>
@@ -417,9 +417,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {/* Total Filtrado */}
-            <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-              <div className="text-sm text-muted-foreground">Total Filtrado</div>
-              <div className="text-2xl font-bold">{formatCurrency(filteredTotal)}</div>
+            <div className="mb-4 p-4 bg-accent-orange-subtle rounded-lg">
+              <div className="text-sm text-accent-orange">Total Filtrado</div>
+              <div className="text-2xl font-bold text-accent-orange">{formatCurrency(filteredTotal)}</div>
             </div>
             
             {/* Gráfico */}
@@ -444,7 +444,7 @@ export default function Dashboard() {
                   />
                   <Bar 
                     dataKey="value" 
-                    fill="hsl(var(--primary))" 
+                    fill="hsl(var(--accent-orange))" 
                     radius={[4, 4, 0, 0]}
                     name="Receita"
                   />
